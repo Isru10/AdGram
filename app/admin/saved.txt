@@ -1,0 +1,31 @@
+import AdminSidebar from "@/components/admin/AdminSidebar";
+import type { Metadata } from "next";
+
+
+export const metadata: Metadata = {
+  title: "Admin Dashboard | TG Marketplace",
+  description: "Manage users, ads, and settings.",
+};
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    // The main container for the admin section
+    // It uses flexbox to create the sidebar + main content layout
+    <div className="flex min-h-screen">
+      
+      {/* The Sidebar Component */}
+      <AdminSidebar />
+
+      {/* The Main Content Area */}
+      {/* The children prop will be the actual admin page (e.g., dashboard, users page) */}
+      <main className="flex-1 p-6 md:p-8 bg-slate-800/50">
+        {children}
+      </main>
+
+    </div>
+  );
+}

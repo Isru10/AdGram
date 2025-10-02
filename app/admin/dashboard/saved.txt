@@ -1,0 +1,151 @@
+"use client"; // Mark the page as a Client Component
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect, useCallback } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Users, Newspaper, DollarSign, CheckCircle } from "lucide-react";
+
+// Define a type for our stats object for type safety
+type DashboardStats = {
+  totalUsers: number;
+  totalAds: number;
+  availableAds: number;
+  soldAds: number;
+  totalRevenue: number;
+};
+
+export default function DashboardPage() {
+  // Use state to hold the stats and loading status
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Use useCallback to memoize the fetch function
+  const fetchDashboardStats = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // Client-side fetch automatically includes cookies for authentication
+      const res = await fetch('/api/admin/stats');
+
+      if (res.status === 403) {
+        throw new Error('You do not have permission to view this page.');
+      }
+      if (!res.ok) {
+        throw new Error('Failed to fetch dashboard data.');
+      }
+
+      const data: DashboardStats = await res.json();
+      setStats(data);
+    } catch (err: any) {
+      console.error("Failed to fetch dashboard stats:", err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []); // Empty dependency array as it doesn't depend on any props or state
+
+  // Use useEffect to fetch data when the component mounts
+  useEffect(() => {
+    fetchDashboardStats();
+  }, [fetchDashboardStats]); // The effect runs when the component mounts
+
+  // Handle loading state
+  if (isLoading) {
+    return <p className="text-center p-10 text-slate-400">Loading Dashboard...</p>;
+  }
+
+  // Handle error state
+  if (error) {
+    return <p className="text-center p-10 text-red-400">{error}</p>;
+  }
+
+  // Handle case where stats are not loaded for some reason (e.g., network error after loading)
+  if (!stats) {
+    return <p className="text-center p-10 text-slate-400">Could not load dashboard data.</p>;
+  }
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+        {/* An interactive button that can re-trigger the data fetch */}
+        <button 
+          onClick={fetchDashboardStats}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+        >
+          Refresh Stats
+        </button>
+      </div>
+
+      {/* Stats Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        {/* Total Users Card */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalUsers.toLocaleString()}</div>
+          </CardContent>
+        </Card>
+
+        {/* Total Ads Card */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Ads Posted</CardTitle>
+            <Newspaper className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalAds.toLocaleString()}</div>
+          </CardContent>
+        </Card>
+
+        {/* Sold Ads Card */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Items Sold</CardTitle>
+            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.soldAds.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">{stats.availableAds.toLocaleString()} ads still available</p>
+          </CardContent>
+        </Card>
+
+        {/* (Example) Total Revenue Card */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">${stats.totalRevenue.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">Based on future commissions</p>
+          </CardContent>
+        </Card>
+
+      </div>
+
+      {/* Placeholder for future charts or recent activity tables */}
+      <div className="mt-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+            <CardDescription>A list of recent sales and user sign-ups will appear here.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">Coming soon...</p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
