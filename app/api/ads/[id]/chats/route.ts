@@ -63,20 +63,22 @@ import Chat from "@/models/Chat";
 import User from "@/models/User";
 import { NextRequest, NextResponse } from "next/server";
 
+// ===== THE FIX: Define the type for the context object explicitly =====
+type RouteContext = {
+  params: {
+    id: string;
+  };
+};
+
 // GET: Fetch all chats for a specific ad
-export async function GET(
-  request: NextRequest,
-  // ===== CHANGE 1: Accept the whole context object with its type =====
-  context: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, context: RouteContext) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    // ===== CHANGE 2: Get the 'id' from context.params =====
-    const adId = context.params.id;
+    const { id: adId } = context.params; // Using the 'id' from the typed context
     console.log("Fetching chats for ad:", adId);
     await connectDB();
 
@@ -99,7 +101,6 @@ export async function GET(
     });
 
     return NextResponse.json(chats, { status: 200 });
-
   } catch (error) {
     console.error(`Error fetching chats for ad:`, error);
     return NextResponse.json(
@@ -108,3 +109,4 @@ export async function GET(
     );
   }
 }
+
