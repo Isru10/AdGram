@@ -1,5 +1,7 @@
-import { IConversation } from "@/types"
+
+
 import mongoose, { Schema, type Model } from "mongoose"
+import { IConversation } from "../types/index"
 
 
 const ConversationSchema = new Schema<IConversation>(
