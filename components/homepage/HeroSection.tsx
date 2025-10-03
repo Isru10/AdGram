@@ -144,8 +144,10 @@
 "use client";
 
 import { motion, type Variants, type TargetAndTransition } from "framer-motion";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
+import { FiLoader } from "react-icons/fi";
 
 // --- NO CHANGES TO ANIMATIONS ---
 const textContainerVariants: Variants = {
@@ -181,6 +183,17 @@ const hoverEffect: TargetAndTransition = {
 
 
 export default function HeroSection() {
+  const {status} = useSession()
+  const destinationhref = status === "authenticated" ? "/ads" : "/auth/signin"
+
+console.log("this is the current status",status)
+  if (status === 'loading') {
+    return (
+        <section className="min-h-[90vh] container mx-auto px-6 py-12 lg:py-24 flex items-center justify-center">
+            <FiLoader className="h-8 w-8 animate-spin text-sky-400" />
+        </section>
+    );
+  }
   return (
     <section className="min-h-[90vh] container mx-auto px-6 py-12 lg:py-24 flex flex-col lg:flex-row items-center justify-between gap-12">
       
@@ -209,10 +222,11 @@ export default function HeroSection() {
             variants={textItemVariants}
         >
           <Link
-            href="/auth/signin"
+            href={destinationhref}
             className="inline-block px-8 py-4 bg-sky-600 text-white font-bold rounded-full shadow-2xl shadow-sky-500/50 hover:bg-sky-700 transform hover:-translate-y-1 transition-all duration-300 tracking-wider"
           >
-            Get Started Now
+                        {status === 'authenticated' ? 'Browse Ads Now' : 'Get Started Now'}
+
           </Link>
         </motion.div>
       </motion.div>

@@ -3,32 +3,45 @@ import { getToken } from 'next-auth/jwt'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(req: NextRequest) {
-  // 1. Get the session token
-  // The secret is necessary to decrypt the JWT.
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-
-  // 2. Define the URL for the sign-in page
+  
+  // Define URLs for redirection
   const signInUrl = new URL('/auth/signin', req.url);
-  // Add a `callbackUrl` so the user is redirected back to the admin page they tried to visit after signing in.
+  const adsUrl = new URL('/ads', req.url); // New URL for logged-in users
+
+  // Add callbackUrl for admin redirect
   signInUrl.searchParams.set('callbackUrl', req.nextUrl.pathname);
 
-  // 3. Authorization Logic
-  // Check if the user is trying to access an admin route
+  // --- NEW LOGIC: Prevent logged-in users from accessing auth pages ---
+  const isAuthRoute = req.nextUrl.pathname.startsWith('/auth/signin') || 
+                      req.nextUrl.pathname.startsWith('/auth/signup');
+
+  if (isAuthRoute) {
+    // If the user is logged in (has a token) AND they are trying to access /auth/signin or /auth/signup
+    if (token) {
+      return NextResponse.redirect(adsUrl); // Redirect them to the marketplace
+    }
+    // If they are not logged in, allow them to proceed to the auth page
+    return NextResponse.next();
+  }
+  // --- END OF NEW LOGIC ---
+
+  // Existing Authorization Logic for Admin Routes
   if (req.nextUrl.pathname.startsWith('/admin')) {
-    // If there's no token (user is not logged in) OR the token's role is not 'admin'
     if (!token || token.role !== 'admin') {
-      // Redirect them to the sign-in page
       return NextResponse.redirect(signInUrl);
     }
   }
 
-  // 4. If all checks pass, allow the request to continue
+  // If all checks pass, allow the request to continue
   return NextResponse.next();
 }
 
 // 5. Configure which routes the middleware should run on
 export const config = {
   matcher: [
-    '/admin/:path*', // Run on all routes inside the /admin directory
+    '/admin/:path*', // Admin routes
+    '/auth/signin',  // Sign in page
+    '/auth/signup',  // Sign up page
   ],
 };
