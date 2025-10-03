@@ -327,12 +327,25 @@ export default function HomePage() {
               <h2 className="text-4xl font-extrabold text-white mb-4">Join The Future of Digital Trading</h2>
               <p className="text-lg text-slate-300 max-w-2xl mx-auto mb-10">Your next big opportunity is waiting. Sign up or start browsing today.</p>
               
-              <Link
+              {/* <Link
                 href="/ads"
                 className="inline-block px-8 py-4 mb-8 bg-sky-600 text-white font-bold rounded-full shadow-lg shadow-sky-500/30 hover:bg-sky-700 transform hover:-translate-y-1 transition-all duration-300 tracking-wider"
               >
-                Browse Ads Now
-              </Link>
+                Contact the Developer now : 0998238423
+              </Link> */}
+
+
+
+              <a
+  href="tel:0998238423"
+  className="relative inline-flex items-center justify-center px-10 py-4 mb-8 font-bold text-white rounded-full group overflow-hidden"
+>
+  <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-sky-500 via-indigo-500 to-fuchsia-500 animate-pulse opacity-75 group-hover:opacity-100 transition duration-500 rounded-full"></span>
+  <span className="relative z-10 flex items-center gap-2">
+    📞 Contact The Developer Right Now: 0935562710
+  </span>
+</a>
+
 
               <div className="flex justify-center gap-x-8">
                 <a href="#" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors duration-300" aria-label="Telegram"><FaTelegramPlane size={28} /></a>
